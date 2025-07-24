@@ -114,7 +114,7 @@ class EventSystem(object):
                     if callback(owner, *(args + data)) is False:
                         callbacks_to_remove.append((callback, data))
                 except Exception as e:
-                    print "Error executing callback '%s' for event '%s': %s" % (callback.__name__ if hasattr(callback, '__name__') else str(callback), name, e)
+                    print("Error executing callback '%s' for event '%s': %s" % (callback.__name__ if hasattr(callback, '__name__') else str(callback), name, e))
                     import traceback
                     traceback.print_exc()
 
