@@ -1,0 +1,42 @@
+Modifications to Storm ORM (LGPL v2.1)
+
+This document details changes made to the original Storm ORM source code.
+The original Storm ORM is licensed under the GNU Lesser General Public License, Version 2.1.
+Its source code and original license can be found at: [Link to Official Storm GitHub/Download Page]
+
+---
+
+**Date of Modifications:** 2025-07-24
+
+**Modifier:** [Nghi Tran / ClickMedix]
+
+**Purpose of Modifications:**
+To enhance thread safety and prevent `RuntimeError: Set changed size during iteration` exceptions in concurrent web application environments, specifically when using Storm's event system with multiple simultaneous requests or background operations.
+
+**Affected Files and Specific Changes:**
+
+1.  **File: `storm/event.py`**
+
+    * **Class:** `EventSystem`
+
+    * **Changes:**
+        * **Added `import threading`** at the top of the file.
+        * **Added a reentrant lock (`threading.RLock()`)** as `self._lock` to the `__init__` method of the `EventSystem` class.
+        * **Modified `hook(self, name, callback, *data)` method:**
+            * Wrapped the entire method's logic within `with self._lock:`, ensuring atomic addition of callbacks to `self._hooks`.
+        * **Modified `unhook(self, name, callback, *data)` method:**
+            * Wrapped the entire method's logic within `with self._lock:`, ensuring atomic removal of callbacks from `self._hooks`.
+            * Added logic to `del self._hooks[name]` if the callback set becomes empty.
+        * **Modified `emit(self, name, *args)` method:**
+            * Wrapped the initial snapshot creation (`callbacks_to_execute = list(callbacks)`) within `with self._lock:`, to ensure a consistent copy of callbacks.
+            * Implemented a `callbacks_to_remove` list to collect callbacks returning `False`.
+            * Added a final block `if callbacks_to_remove:` that re-acquires `with self._lock:` and then iterates through `callbacks_to_remove` calling `self.unhook()` for each, ensuring thread-safe removal of callbacks after the emission cycle.
+            * Added `try...except` block around `callback(owner, *(args + data))` to log exceptions without halting event emission.
+
+---
+
+**Note to Users of this Modified Version:**
+This modified version of Storm is intended to replace the original Storm library.
+If you integrate this modified Storm into your project, you are bound by the terms of the GNU Lesser General Public License, Version 2.1.
+Any further modifications to this library must also comply with the LGPL v2.1.
+For the source code of these specific modifications, please refer to [Link to your Git repository/download page where you host your modified Storm source, if applicable].

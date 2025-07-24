@@ -1,0 +1,27 @@
+six
+
+[doc]
+fixtures
+sphinx
+sphinx-epytext
+
+[test]
+fixtures>=1.3.0
+mysqlclient
+pgbouncer>=0.0.7
+postgresfixture
+psycopg2>=2.3.0
+testresources>=0.2.4
+testtools>=0.9.8
+timeline>=0.0.2
+transaction>=1.0.0
+Twisted>=10.0.0
+zope.component>=3.8.0
+zope.configuration
+zope.interface>=4.0.0
+zope.security>=3.7.2
+
+[test:python_version < "3"]
+mysqlclient<2.0.0
+setuptools<45
+Twisted<21.2.0
