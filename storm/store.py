@@ -858,7 +858,9 @@ class Store(object):
             del obj_info["primary_vars"]
 
     def _iter_alive(self):
-        return list(six.itervalues(self._alive))
+        # Create a list of all values to avoid issues with WeakValueDictionary
+        # being modified during iteration due to garbage collection
+        return list(self._alive.values())
 
     def _enable_change_notification(self, obj_info):
         obj_info.event.emit("start-tracking-changes", self._event)
